@@ -13,7 +13,7 @@ export async function GET(
         });
 
         if (!socio) {
-            return NextResponse.json({ error: "Socio not found" }, { status: 404 });
+            return NextResponse.json({ error: "Socio no encontrado" }, { status: 404 });
         }
 
         return NextResponse.json(socio);
@@ -40,7 +40,7 @@ export async function PUT(
         return NextResponse.json(updatedSocio);
     } catch (error) {
         return NextResponse.json(
-            { error: "Error updating socio" },
+            { error: "Error actualizando socio" },
             { status: 500 }
         );
     }
@@ -56,10 +56,10 @@ export async function DELETE(
         await prisma.socio.delete({
             where: { id_socio: id },
         });
-        return NextResponse.json({ message: "Socio deleted successfully" });
+        return NextResponse.json({ message: "Socio eliminado exitosamente" });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error deleting socio" },
+            { error: "Error eliminando socio" },
             { status: 500 }
         );
     }

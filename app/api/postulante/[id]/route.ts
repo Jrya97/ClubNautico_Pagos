@@ -14,7 +14,7 @@ export async function GET(
 
         if (!postulante) {
             return NextResponse.json(
-                { error: "Postulante not found" },
+                { error: "Postulante no encontrado" },
                 { status: 404 }
             );
         }
@@ -43,7 +43,7 @@ export async function PUT(
         return NextResponse.json(updatedPostulante);
     } catch (error) {
         return NextResponse.json(
-            { error: "Error updating postulante" },
+            { error: "Error actualizando postulante" },
             { status: 500 }
         );
     }
@@ -59,10 +59,10 @@ export async function DELETE(
         await prisma.postulante.delete({
             where: { id_postulante: id },
         });
-        return NextResponse.json({ message: "Postulante deleted successfully" });
+        return NextResponse.json({ message: "Postulante eliminado exitosamente" });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error deleting postulante" },
+            { error: "Error eliminando postulante" },
             { status: 500 }
         );
     }

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         return NextResponse.json(newPersona, { status: 201 });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error creating persona" },
+            { error: "Error creando persona" },
             { status: 500 }
         );
     }

@@ -68,7 +68,8 @@ export default async function EstadoCuentaPage({ params }: PageProps) {
                     Gestione sus pagos y consulte su historial
                 </p>
 
-                <AccountTable pagos={pagos} />
+                <AccountTable pagos={pagos} idSocio={idSocio} />
+
 
                 <div className="mt-8">
                     <SummaryCards

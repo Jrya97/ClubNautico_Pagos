@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         return NextResponse.json(newSocio, { status: 201 });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error creating socio" },
+            { error: "Error creando socio" },
             { status: 500 }
         );
     }

@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Club Náutico — Informe del Aplicativo
 
-## Getting Started
+Aplicativo web para la gestión del Club Náutico, construido con Next.js y Prisma sobre PostgreSQL. Incluye autenticación, administración de usuarios y roles, gestión de socios y postulantes, estado de cuenta, pagos y emisión de recibos.
 
-First, run the development server:
+## Tecnologías
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 16 (App Router) y React 19
+- TypeScript
+- Prisma ORM con `@prisma/adapter-pg` y `pg` (PostgreSQL)
+- ESLint con configuración de Next.js
+- Tailwind CSS 4 (postcss integrado)
+
+## Arquitectura
+
+- `app/`: rutas de la App Router de Next.js y endpoints HTTP.
+  - `app/api/*/route.ts`: controladores de API (login, usuarios, roles, socios, postulantes, documentos de pago).
+  - Páginas: `app/estado_cuenta/[id]/pagar/[id_documento]/page.tsx`, `app/estado_cuenta/[id]/recibo/[id_documento]/page.tsx`, `app/estado_cuenta/[id]/page.tsx`, `app/page.tsx`, `app/layout.tsx`.
+- `components/`: componentes de interfaz (formularios, tablas, recibos, UI).
+- `hooks/`: hooks reutilizables (por ejemplo, `useLogin`).
+- `lib/prisma.ts`: cliente Prisma inicializado con `DATABASE_URL`.
+- `prisma/schema.prisma`: modelo de datos del sistema.
+
+## Requisitos
+
+- Node.js 18+ LTS
+- PNPM 8+
+- PostgreSQL con una base de datos accesible
+- Variables de entorno configuradas
+
+## Configuración
+
+Crear un archivo `.env` en la raíz del proyecto con:
+
+```env
+DATABASE_URL="postgresql://usuario:password@host:puerto/base_de_datos"
+NODE_ENV="development"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Prisma utiliza `DATABASE_URL` en `lib/prisma.ts`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Instalación y ejecución
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm install
+pnpm dev
+```
 
-## Learn More
+Abrir `http://localhost:3000` en el navegador.
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts disponibles
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `pnpm dev`: servidor de desarrollo.
+- `pnpm build`: compilación para producción.
+- `pnpm start`: iniciar en producción.
+- `pnpm lint`: análisis estático con ESLint.
+- `pnpm db:studio`: abrir Prisma Studio.
+- `pnpm db:test`: script auxiliar para pruebas de base de datos.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Endpoints principales (API)
 
-## Deploy on Vercel
+- `POST /api/auth/login`
+- `GET/POST /api/persona`, `GET/PUT/DELETE /api/persona/[id]`
+- `GET/POST /api/postulante`, `GET/PUT/DELETE /api/postulante/[id]`
+- `GET/POST /api/socio`, `GET/PUT/DELETE /api/socio/[id]`
+- `GET/POST /api/usuario`, `GET/PUT/DELETE /api/usuario/[id]`
+- `GET/POST /api/rol`, `GET/PUT/DELETE /api/rol/[id]`
+- `GET/POST /api/usuario_rol`, `GET/PUT/DELETE /api/usuario_rol/[id_usuario]/[id_rol]`
+- `GET/POST /api/documento_pago`, `GET/PUT/DELETE /api/documento_pago/[id]`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+La semántica exacta de cada endpoint se define en sus respectivos `route.ts`.
+ 
+## Directorios clave
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/estado_cuenta`: páginas para visualizar, pagar y emitir recibos de documentos.
+- `components/estado_cuenta`: `AccountTable`, `SummaryCards`.
+- `components/pagar`: `PaymentForm`, `PaymentSummary`.
+- `components/receipt`: `PaymentReceipt`.
+- `components/auth`: `LoginForm`.
+- `components/ui`: componentes básicos (`Button`, `Card`, `Input`).
+
+## Base de datos y Prisma
+
+- Definir el esquema en `prisma/schema.prisma`.
+- Generar y sincronizar el cliente y el esquema:
+  ```bash
+  pnpm exec prisma generate
+  pnpm exec prisma db push
+  # o, usando migraciones:
+  pnpm exec prisma migrate dev --name init
+  ```
+- Explorar datos con Prisma Studio:
+  ```bash
+  pnpm db:studio
+  ```
+
+## Calidad y buenas prácticas
+
+- Ejecutar `pnpm lint` antes de subir cambios.
+- Mantener las credenciales fuera del repositorio y usar `.env`.
+- No registrar datos sensibles en logs.
+
+## Despliegue
+
+- Construir con `pnpm build` y ejecutar `pnpm start`.
+- Compatibilidad con plataformas como Vercel. Revisar la documentación de Next.js para despliegue en producción.
+
+## Licencia
+
+Proyecto privado del Club Náutico. Uso interno.

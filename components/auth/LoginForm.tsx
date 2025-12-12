@@ -1,15 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
+import { useLogin } from "@/hooks/useLogin";
 
 export function LoginForm() {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const { login, loading, error } = useLogin();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await login(username, password);
+    };
+
     return (
         <Card className="text-center">
             <div className="flex justify-center mb-6">
-                <div className="bg-blue-700  p-3 rounded-full shadow-lg shadow-blue-500/40">
+                <div className="bg-blue-700 p-3 rounded-full shadow-lg shadow-blue-500/40">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="32"
@@ -36,21 +46,39 @@ export function LoginForm() {
                 Sistema de Gestión de Socios
             </h2>
 
-            <form onSubmit={(e) => e.preventDefault()}>
+            <form onSubmit={handleSubmit}>
                 <Input
                     label="Usuario"
                     placeholder="Ingrese su usuario"
                     type="text"
                     className="mb-2"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
                 />
                 <Input
                     label="Contraseña"
                     placeholder="Ingrese su contraseña"
                     type="password"
                     className="mb-6"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
                 />
 
-                <Button type="submit" className="active:scale-95 transition-transform">Ingresar</Button>
+                {error && (
+                    <div className="mb-4 text-red-500 text-sm bg-red-50 p-2 rounded">
+                        {error}
+                    </div>
+                )}
+
+                <Button
+                    type="submit"
+                    className="active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={loading}
+                >
+                    {loading ? "Ingresando..." : "Ingresar"}
+                </Button>
 
                 <div className="mt-6">
                     <a

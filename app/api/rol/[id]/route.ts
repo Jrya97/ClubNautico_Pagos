@@ -13,7 +13,7 @@ export async function GET(
         });
 
         if (!rol) {
-            return NextResponse.json({ error: "Rol not found" }, { status: 404 });
+            return NextResponse.json({ error: "Rol no encontrado" }, { status: 404 });
         }
 
         return NextResponse.json(rol);
@@ -40,7 +40,7 @@ export async function PUT(
         return NextResponse.json(updatedRol);
     } catch (error) {
         return NextResponse.json(
-            { error: "Error updating rol" },
+            { error: "Error actualizando rol" },
             { status: 500 }
         );
     }
@@ -56,10 +56,10 @@ export async function DELETE(
         await prisma.rol.delete({
             where: { id_rol: id },
         });
-        return NextResponse.json({ message: "Rol deleted successfully" });
+        return NextResponse.json({ message: "Rol eliminado exitosamente" });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error deleting rol" },
+            { error: "Error eliminando rol" },
             { status: 500 }
         );
     }

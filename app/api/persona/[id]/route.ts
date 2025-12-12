@@ -13,7 +13,7 @@ export async function GET(
         });
 
         if (!persona) {
-            return NextResponse.json({ error: "Persona not found" }, { status: 404 });
+            return NextResponse.json({ error: "Persona no encontrada" }, { status: 404 });
         }
 
         return NextResponse.json(persona);
@@ -40,7 +40,7 @@ export async function PUT(
         return NextResponse.json(updatedPersona);
     } catch (error) {
         return NextResponse.json(
-            { error: "Error updating persona" },
+            { error: "Error actualizando persona" },
             { status: 500 }
         );
     }
@@ -56,10 +56,10 @@ export async function DELETE(
         await prisma.persona.delete({
             where: { id_persona: id },
         });
-        return NextResponse.json({ message: "Persona deleted successfully" });
+        return NextResponse.json({ message: "Persona eliminada exitosamente" });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error deleting persona" },
+            { error: "Error eliminando persona" },
             { status: 500 }
         );
     }

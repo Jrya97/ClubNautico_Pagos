@@ -13,7 +13,7 @@ export async function GET(
         });
 
         if (!usuario) {
-            return NextResponse.json({ error: "Usuario not found" }, { status: 404 });
+            return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
         }
 
         return NextResponse.json(usuario);
@@ -40,7 +40,7 @@ export async function PUT(
         return NextResponse.json(updatedUsuario);
     } catch (error) {
         return NextResponse.json(
-            { error: "Error updating usuario" },
+            { error: "Error actualizando usuario" },
             { status: 500 }
         );
     }
@@ -56,10 +56,10 @@ export async function DELETE(
         await prisma.usuario.delete({
             where: { id_usuario: id },
         });
-        return NextResponse.json({ message: "Usuario deleted successfully" });
+        return NextResponse.json({ message: "Usuario eliminado exitosamente" });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error deleting usuario" },
+            { error: "Error eliminando usuario" },
             { status: 500 }
         );
     }

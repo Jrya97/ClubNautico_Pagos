@@ -1,18 +1,20 @@
 import { Button } from "../ui/Button";
+import Link from "next/link";
 
 interface Pago {
     id: number;
-    periodo: string; // "Dic-2025"
-    fechaEmision: string; // "01/12/2025"
+    periodo: string;
+    fechaEmision: string;
     total: number;
     estado: "Pendiente" | "Pagado";
 }
 
 interface AccountTableProps {
     pagos: Pago[];
+    idSocio: number;
 }
 
-export function AccountTable({ pagos }: AccountTableProps) {
+export function AccountTable({ pagos, idSocio }: AccountTableProps) {
     const formatCurrency = (val: number) => `S/ ${val.toFixed(2)}`;
 
     return (
@@ -56,8 +58,10 @@ export function AccountTable({ pagos }: AccountTableProps) {
                                     <td className="px-6 py-4">
                                         <span
                                             className={`px-3 py-1 rounded-full text-xs font-semibold ${pago.estado === "Pendiente"
-                                                    ? "bg-red-100 text-red-600"
-                                                    : "bg-green-100 text-green-600"
+                                                ? "bg-red-100 text-red-600"
+                                                : pago.estado === "Pagado" ? "bg-green-100 text-green-600"
+                                                    : pago.estado === "Anulado" ? "bg-gray-100 text-gray-600"
+                                                        : "bg-yellow-100 text-yellow-600"
                                                 }`}
                                         >
                                             {pago.estado}
@@ -65,30 +69,34 @@ export function AccountTable({ pagos }: AccountTableProps) {
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         {pago.estado === "Pendiente" ? (
-                                            <Button className="w-auto px-6 py-1.5 text-xs bg-blue-800 hover:bg-blue-900 shadow-none">
-                                                PAGAR
-                                            </Button>
+                                            <Link href={`/estado_cuenta/${idSocio}/pagar/${pago.id}`}>
+                                                <Button className="active:scale-95 transition-transform w-auto px-6 py-1.5 text-xs bg-blue-800 hover:bg-blue-900 shadow-none">
+                                                    PAGAR
+                                                </Button>
+                                            </Link>
                                         ) : (
-                                            <button className="text-blue-700 px-4 py-1.5 rounded border border-blue-700 text-xs hover:bg-blue-50 transition-colors flex items-center gap-2 mx-auto">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="14"
-                                                    height="14"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                                                    <polyline points="14 2 14 8 20 8" />
-                                                    <line x1="16" y1="13" x2="8" y2="13" />
-                                                    <line x1="16" y1="17" x2="8" y2="17" />
-                                                    <polyline points="10 9 9 9 8 9" />
-                                                </svg>
-                                                Ver Recibo
-                                            </button>
+                                            <Link href={`/estado_cuenta/${idSocio}/recibo/${pago.id}`}>
+                                                <button className="text-blue-700 px-4 py-1.5 rounded border border-blue-700 text-xs hover:bg-blue-50 transition-colors flex items-center gap-2 mx-auto">
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="14"
+                                                        height="14"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
+                                                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                                        <polyline points="14 2 14 8 20 8" />
+                                                        <line x1="16" y1="13" x2="8" y2="13" />
+                                                        <line x1="16" y1="17" x2="8" y2="17" />
+                                                        <polyline points="10 9 9 9 8 9" />
+                                                    </svg>
+                                                    Ver Recibo
+                                                </button>
+                                            </Link>
                                         )}
                                     </td>
                                 </tr>

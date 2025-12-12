@@ -7,7 +7,7 @@ export async function GET() {
         return NextResponse.json(usuarioRoles);
     } catch (error) {
         return NextResponse.json(
-            { error: "Error fetching usuario_rol entries" },
+            { error: "Error fetching usuario_rol" },
             { status: 500 }
         );
     }
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         return NextResponse.json(newUsuarioRol, { status: 201 });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error creating usuario_rol entry" },
+            { error: "Error creando usuario_rol" },
             { status: 500 }
         );
     }

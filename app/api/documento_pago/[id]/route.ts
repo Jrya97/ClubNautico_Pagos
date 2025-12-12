@@ -14,7 +14,7 @@ export async function GET(
 
         if (!documento) {
             return NextResponse.json(
-                { error: "Documento de pago not found" },
+                { error: "Documento de pago no encontrado" },
                 { status: 404 }
             );
         }
@@ -60,11 +60,11 @@ export async function DELETE(
             where: { id_documento: id },
         });
         return NextResponse.json({
-            message: "Documento de pago deleted successfully",
+            message: "Documento de pago eliminado exitosamente",
         });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error deleting documento de pago" },
+            { error: "Error eliminando documento de pago" },
             { status: 500 }
         );
     }

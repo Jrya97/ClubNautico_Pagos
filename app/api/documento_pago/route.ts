@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         return NextResponse.json(newDocumento, { status: 201 });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error creating documento de pago" },
+            { error: "Error creando documento de pago" },
             { status: 500 }
         );
     }

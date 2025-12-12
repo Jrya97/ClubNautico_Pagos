@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         return NextResponse.json(newRol, { status: 201 });
     } catch (error) {
         return NextResponse.json(
-            { error: "Error creating rol" },
+            { error: "Error creando rol" },
             { status: 500 }
         );
     }

@@ -20,7 +20,7 @@ export async function GET(
 
         if (!usuarioRol) {
             return NextResponse.json(
-                { error: "Usuario_rol entry not found" },
+                { error: "Usuario_rol no encontrado" },
                 { status: 404 }
             );
         }
@@ -28,7 +28,7 @@ export async function GET(
         return NextResponse.json(usuarioRol);
     } catch (error) {
         return NextResponse.json(
-            { error: "Error fetching usuario_rol entry" },
+            { error: "Error obteniendo usuario_rol" },
             { status: 500 }
         );
     }
