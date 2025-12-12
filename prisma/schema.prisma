@@ -1,0 +1,297 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model cfg_clasificacion_socio {
+  id_clasificacion Int     @id @default(autoincrement())
+  nombre           String  @unique @db.VarChar(50)
+  descripcion      String? @db.VarChar(255)
+  socio            socio[]
+}
+
+model cfg_estado_documento {
+  id_estado      Int              @id @default(autoincrement())
+  nombre         String           @unique @db.VarChar(50)
+  descripcion    String?          @db.VarChar(255)
+  documento_pago documento_pago[]
+}
+
+model cfg_estado_general {
+  id_estado                  Int                          @id @default(autoincrement())
+  nombre                     String                       @unique @db.VarChar(50)
+  descripcion                String?                      @db.VarChar(255)
+  ficha_registro_embarcacion ficha_registro_embarcacion[]
+  movimiento_navio           movimiento_navio[]
+  queja                      queja[]
+  retiro                     retiro[]
+  solicitud_inscripcion      solicitud_inscripcion[]
+}
+
+model cfg_estado_postulante {
+  id_estado   Int          @id @default(autoincrement())
+  nombre      String       @unique @db.VarChar(50)
+  descripcion String?      @db.VarChar(255)
+  postulante  postulante[]
+}
+
+model cfg_estado_socio {
+  id_estado   Int     @id @default(autoincrement())
+  nombre      String  @unique @db.VarChar(50)
+  descripcion String? @db.VarChar(255)
+  socio       socio[]
+}
+
+model detalle_consumo {
+  id_detalle     Int             @id @default(autoincrement())
+  id_documento   Int?
+  id_socio       Int
+  id_rubro       Int
+  fecha_consumo  DateTime        @db.Date
+  cantidad       Int             @default(1)
+  monto          Decimal         @db.Decimal(14, 2)
+  descripcion    String?
+  documento_pago documento_pago? @relation(fields: [id_documento], references: [id_documento], onUpdate: NoAction, map: "fk_detalle_documento")
+  rubro          rubro           @relation(fields: [id_rubro], references: [id_rubro], onUpdate: NoAction, map: "fk_detalle_rubro")
+  socio          socio           @relation(fields: [id_socio], references: [id_socio], onDelete: Cascade, onUpdate: NoAction, map: "fk_detalle_socio")
+
+  @@index([id_rubro], map: "idx_detalle_consumo_rubro")
+  @@index([id_socio], map: "idx_detalle_consumo_socio")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model documento_pago {
+  id_documento         Int                  @id @default(autoincrement())
+  id_socio             Int
+  periodo              Int
+  mes                  Int                  @db.SmallInt
+  subtotal             Decimal              @default(0.00) @db.Decimal(14, 2)
+  igv                  Decimal              @default(0.00) @db.Decimal(14, 2)
+  total                Decimal              @default(0.00) @db.Decimal(14, 2)
+  id_estado            Int
+  fecha_emision        DateTime             @default(dbgenerated("CURRENT_DATE")) @db.Date
+  fecha_pago           DateTime?            @db.Date
+  observaciones        String?
+  detalle_consumo      detalle_consumo[]
+  cfg_estado_documento cfg_estado_documento @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_documento_estado")
+  socio                socio                @relation(fields: [id_socio], references: [id_socio], onDelete: Cascade, onUpdate: NoAction, map: "fk_documento_socio")
+
+  @@unique([id_socio, periodo, mes], map: "uq_socio_periodo")
+}
+
+model embarcacion {
+  id_embarcacion             Int                         @id @default(autoincrement())
+  matricula                  String                      @unique @db.VarChar(50)
+  nombre                     String                      @db.VarChar(150)
+  eslora                     Decimal                     @db.Decimal(6, 2)
+  manga                      Decimal?                    @db.Decimal(6, 2)
+  tonelaje                   Decimal?                    @db.Decimal(8, 2)
+  id_socio                   Int
+  id_rada                    Int?
+  fecha_registro             DateTime                    @default(dbgenerated("CURRENT_DATE")) @db.Date
+  rada                       rada?                       @relation(fields: [id_rada], references: [id_rada], onUpdate: NoAction, map: "fk_embarcacion_rada")
+  socio                      socio                       @relation(fields: [id_socio], references: [id_socio], onDelete: Cascade, onUpdate: NoAction, map: "fk_embarcacion_socio")
+  ficha_registro_embarcacion ficha_registro_embarcacion?
+  movimiento_navio           movimiento_navio[]
+
+  @@index([matricula], map: "idx_embarcacion_matricula")
+  @@index([id_socio], map: "idx_embarcacion_socio")
+}
+
+model ficha_registro_embarcacion {
+  id_ficha           Int                @id @default(autoincrement())
+  id_embarcacion     Int                @unique
+  fecha_registro     DateTime           @default(dbgenerated("CURRENT_DATE")) @db.Date
+  id_estado          Int
+  observaciones      String?
+  embarcacion        embarcacion        @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: Cascade, onUpdate: NoAction, map: "fk_ficha_embarcacion")
+  cfg_estado_general cfg_estado_general @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_ficha_estado")
+}
+
+model liquidacion_administrativa {
+  id_liquidacion   Int      @id @default(autoincrement())
+  id_retiro        Int      @unique
+  pagos_pendientes Decimal  @default(0.00) @db.Decimal(12, 2)
+  fecha_generacion DateTime @default(dbgenerated("CURRENT_DATE")) @db.Date
+  observaciones    String?
+  retiro           retiro   @relation(fields: [id_retiro], references: [id_retiro], onDelete: Cascade, onUpdate: NoAction, map: "fk_liquidacion_retiro")
+}
+
+model movimiento_navio {
+  id_movimiento       Int                @id @default(autoincrement())
+  id_embarcacion      Int
+  fecha_salida        DateTime           @db.Date
+  hora_salida         DateTime?          @db.Time(6)
+  fecha_retorno       DateTime?          @db.Date
+  destino             String?            @db.VarChar(255)
+  tripulacion         String?
+  pasajeros           String?
+  autorizacion_dicapi Boolean?           @default(false)
+  id_estado           Int                @default(1)
+  fecha_registro      DateTime           @default(now()) @db.Timestamp(6)
+  embarcacion         embarcacion        @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: Cascade, onUpdate: NoAction, map: "fk_movimiento_embarcacion")
+  cfg_estado_general  cfg_estado_general @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_movimiento_estado")
+
+  @@index([id_embarcacion], map: "idx_movimiento_embarcacion")
+}
+
+model persona {
+  id_persona               Int                        @id @default(autoincrement())
+  dni                      String                     @unique @db.Char(8)
+  nombres                  String                     @db.VarChar(100)
+  apellidos                String                     @db.VarChar(150)
+  correo                   String?                    @db.VarChar(150)
+  telefono                 String?                    @db.VarChar(40)
+  direccion                String?                    @db.VarChar(300)
+  fecha_nacimiento         DateTime?                  @db.Date
+  fecha_registro           DateTime                   @default(now()) @db.Timestamp(6)
+  observaciones            String?
+  persona_estado_historial persona_estado_historial[]
+  postulante               postulante?
+  socio                    socio?
+  usuario                  usuario?
+
+  @@index([apellidos], map: "idx_persona_apellidos")
+  @@index([dni], map: "idx_persona_dni")
+}
+
+model persona_estado_historial {
+  id_historial Int       @id @default(autoincrement())
+  id_persona   Int
+  entidad      String    @db.VarChar(100)
+  id_entidad   Int?
+  id_estado    Int
+  fecha_inicio DateTime  @default(now()) @db.Timestamp(6)
+  fecha_fin    DateTime? @db.Timestamp(6)
+  comentario   String?
+  persona      persona   @relation(fields: [id_persona], references: [id_persona], onDelete: Cascade, onUpdate: NoAction, map: "fk_historial_persona")
+
+  @@index([id_persona], map: "idx_historial_persona")
+}
+
+model postulante {
+  id_postulante         Int                     @id @default(autoincrement())
+  id_persona            Int                     @unique
+  historial_deudas      Boolean                 @default(false)
+  id_estado             Int
+  fecha_postulacion     DateTime                @default(dbgenerated("CURRENT_DATE")) @db.Date
+  comentarios           String?
+  cfg_estado_postulante cfg_estado_postulante   @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_postulante_estado")
+  persona               persona                 @relation(fields: [id_persona], references: [id_persona], onDelete: Cascade, onUpdate: NoAction, map: "fk_postulante_persona")
+  solicitud_inscripcion solicitud_inscripcion[]
+}
+
+model queja {
+  id_queja           Int                @id @default(autoincrement())
+  folio              String             @unique @db.VarChar(50)
+  id_socio           Int
+  descripcion        String
+  fecha_registro     DateTime           @default(now()) @db.Timestamp(6)
+  id_estado          Int
+  respuesta          String?
+  cfg_estado_general cfg_estado_general @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_queja_estado")
+  socio              socio              @relation(fields: [id_socio], references: [id_socio], onDelete: Cascade, onUpdate: NoAction, map: "fk_queja_socio")
+}
+
+model rada {
+  id_rada      Int           @id @default(autoincrement())
+  codigo       String        @unique @db.VarChar(20)
+  largo_maximo Decimal       @db.Decimal(6, 2)
+  descripcion  String?       @db.VarChar(255)
+  estado       String        @default("Libre") @db.VarChar(50)
+  embarcacion  embarcacion[]
+}
+
+model retiro {
+  id_retiro                  Int                         @id @default(autoincrement())
+  id_socio                   Int
+  fecha_solicitud            DateTime                    @default(dbgenerated("CURRENT_DATE")) @db.Date
+  motivo                     String?
+  id_estado                  Int                         @default(1)
+  fecha_procesamiento        DateTime?                   @db.Timestamp(6)
+  liquidacion_administrativa liquidacion_administrativa?
+  cfg_estado_general         cfg_estado_general          @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_retiro_estado")
+  socio                      socio                       @relation(fields: [id_socio], references: [id_socio], onDelete: Cascade, onUpdate: NoAction, map: "fk_retiro_socio")
+}
+
+model rol {
+  id_rol      Int           @id @default(autoincrement())
+  nombre      String        @unique @db.VarChar(100)
+  descripcion String?       @db.VarChar(255)
+  usuario_rol usuario_rol[]
+}
+
+model rubro {
+  id_rubro        Int               @id @default(autoincrement())
+  concepto        String            @db.VarChar(150)
+  monto_base      Decimal           @db.Decimal(12, 2)
+  tipo            String?           @db.VarChar(50)
+  descripcion     String?
+  detalle_consumo detalle_consumo[]
+}
+
+model socio {
+  id_socio                Int                     @id @default(autoincrement())
+  id_persona              Int                     @unique
+  codigo_socio            String                  @unique @db.VarChar(30)
+  id_clasificacion        Int
+  id_estado               Int
+  id_usuario              Int?
+  fecha_alta              DateTime                @default(dbgenerated("CURRENT_DATE")) @db.Date
+  fecha_baja              DateTime?               @db.Date
+  causa_baja              String?
+  detalle_consumo         detalle_consumo[]
+  documento_pago          documento_pago[]
+  embarcacion             embarcacion[]
+  queja                   queja[]
+  retiro                  retiro[]
+  cfg_clasificacion_socio cfg_clasificacion_socio @relation(fields: [id_clasificacion], references: [id_clasificacion], onDelete: NoAction, onUpdate: NoAction, map: "fk_socio_clasificacion")
+  cfg_estado_socio        cfg_estado_socio        @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_socio_estado")
+  persona                 persona                 @relation(fields: [id_persona], references: [id_persona], onDelete: Cascade, onUpdate: NoAction, map: "fk_socio_persona")
+  usuario                 usuario?                @relation(fields: [id_usuario], references: [id_usuario], onUpdate: NoAction, map: "fk_socio_usuario")
+  solicitud_inscripcion   solicitud_inscripcion[]
+
+  @@index([codigo_socio], map: "idx_socio_codigo")
+  @@index([id_persona], map: "idx_socio_persona")
+}
+
+model solicitud_inscripcion {
+  id_solicitud        Int                @id @default(autoincrement())
+  numero_solicitud    String             @unique @db.VarChar(50)
+  fecha_solicitud     DateTime           @default(dbgenerated("CURRENT_DATE")) @db.Date
+  id_postulante       Int
+  id_socio_resultante Int?
+  id_estado           Int
+  motivo_rechazo      String?
+  comentarios         String?
+  cfg_estado_general  cfg_estado_general @relation(fields: [id_estado], references: [id_estado], onDelete: NoAction, onUpdate: NoAction, map: "fk_solicitud_estado")
+  postulante          postulante         @relation(fields: [id_postulante], references: [id_postulante], onDelete: NoAction, onUpdate: NoAction, map: "fk_solicitud_postulante")
+  socio               socio?             @relation(fields: [id_socio_resultante], references: [id_socio], onUpdate: NoAction, map: "fk_solicitud_socio")
+}
+
+model usuario {
+  id_usuario     Int           @id @default(autoincrement())
+  id_persona     Int           @unique
+  username       String        @unique @db.VarChar(100)
+  password_hash  String        @db.VarChar(255)
+  activo         Boolean       @default(true)
+  fecha_creacion DateTime      @default(now()) @db.Timestamp(6)
+  ultimo_login   DateTime?     @db.Timestamp(6)
+  socio          socio[]
+  persona        persona       @relation(fields: [id_persona], references: [id_persona], onDelete: Cascade, onUpdate: NoAction, map: "fk_usuario_persona")
+  usuario_rol    usuario_rol[]
+}
+
+model usuario_rol {
+  id_usuario       Int
+  id_rol           Int
+  fecha_asignacion DateTime @default(now()) @db.Timestamp(6)
+  rol              rol      @relation(fields: [id_rol], references: [id_rol], onDelete: Cascade, onUpdate: NoAction, map: "fk_usuario_rol_rol")
+  usuario          usuario  @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "fk_usuario_rol_usuario")
+
+  @@id([id_usuario, id_rol])
+}
