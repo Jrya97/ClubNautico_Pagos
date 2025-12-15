@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
-    if (request.nextUrl.pathname.startsWith("/estado_cuenta")) {
+    if (request.nextUrl.pathname.startsWith("/estado_cuenta") || request.nextUrl.pathname.startsWith("/tesoreria")) {
         const authCookie = request.cookies.get("auth_session");
 
         if (!authCookie) {
@@ -15,5 +15,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: "/estado_cuenta/:path*",
+    matcher: ["/estado_cuenta/:path*", "/tesoreria/:path*"],
 };

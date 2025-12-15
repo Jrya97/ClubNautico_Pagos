@@ -14,6 +14,13 @@ export async function POST(request: Request) {
 
         const user = await prisma.usuario.findUnique({
             where: { username },
+            include: {
+                usuario_rol: {
+                    include: {
+                        rol: true
+                    }
+                }
+            }
         });
 
         if (!user) {
@@ -37,34 +44,66 @@ export async function POST(request: Request) {
             );
         }
 
-        const socio = await prisma.socio.findFirst({
-            where: { id_usuario: user.id_usuario }
-        });
+        const roles = user.usuario_rol.map((ur) => ur.rol.nombre);
 
-        if (!socio) {
-            return NextResponse.json(
-                { error: "El usuario no está asociado a un socio activo" },
-                { status: 403 }
-            );
+        if (roles.includes("TESORERIA")) {
+            const response = NextResponse.json({
+                success: true,
+                role: "TESORERIA",
+                user: {
+                    id: user.id_usuario,
+                    username: user.username,
+                },
+            });
+
+            response.cookies.set("auth_session", "true", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 60 * 60 * 24,
+                path: "/",
+            });
+
+            return response;
         }
 
-        const response = NextResponse.json({
-            success: true,
-            id_socio: socio.id_socio,
-            user: {
-                id: user.id_usuario,
-                username: user.username,
-            },
-        });
+        if (roles.includes("SOCIO")) {
+            const socio = await prisma.socio.findFirst({
+                where: { id_usuario: user.id_usuario }
+            });
 
-        response.cookies.set("auth_session", "true", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            maxAge: 60 * 60 * 24,
-            path: "/",
-        });
+            if (!socio) {
+                return NextResponse.json(
+                    { error: "El usuario tiene rol SOCIO pero no está asociado a un socio activo" },
+                    { status: 403 }
+                );
+            }
 
-        return response;
+            const response = NextResponse.json({
+                success: true,
+                role: "SOCIO",
+                id_socio: socio.id_socio,
+                user: {
+                    id: user.id_usuario,
+                    username: user.username,
+                },
+            });
+
+            response.cookies.set("auth_session", "true", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 60 * 60 * 24,
+                path: "/",
+            });
+
+            return response;
+        }
+
+        return NextResponse.json(
+            { error: "No tiene un rol autorizado para acceder" },
+            { status: 403 }
+        );
+
+
     } catch (error) {
         console.error("Login error:", error);
         return NextResponse.json(

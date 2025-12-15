@@ -3,7 +3,14 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
     try {
-        const socios = await prisma.socio.findMany();
+        const socios = await prisma.socio.findMany({
+            include: {
+                persona: true
+            },
+            orderBy: {
+                id_socio: 'asc'
+            }
+        });
         return NextResponse.json(socios);
     } catch (error) {
         return NextResponse.json(

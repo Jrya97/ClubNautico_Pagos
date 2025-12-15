@@ -30,7 +30,14 @@ export function useLogin() {
                 throw new Error(data.error || "Error al iniciar sesión");
             }
 
-            router.push(`/estado_cuenta/${data.id_socio}`);
+            if (data.role === "TESORERIA") {
+                router.push("/tesoreria");
+            } else if (data.role === "SOCIO" && data.id_socio) {
+                router.push(`/estado_cuenta/${data.id_socio}`);
+            } else {
+                router.push("/");
+            }
+
             return { success: true };
         } catch (err: any) {
             const errorMessage = err.message || "Ocurrió un error inesperado";
